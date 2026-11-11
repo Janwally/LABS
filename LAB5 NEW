@@ -1,0 +1,174 @@
+import mysql.connector
+
+
+# Student Master Class
+class Student_Master:
+
+    def __init__(self, stu_id, stu_name, stu_major, stu_courses, stu_cgpa):
+        self.stu_id = stu_id
+        self.stu_name = stu_name
+        self.stu_major = stu_major
+        self.stu_courses = stu_courses
+        self.stu_cgpa = stu_cgpa
+
+
+# Faculty Master Class
+class Faculty_Master:
+
+    def __init__(self, fac_id, fac_name, fac_department, fac_teaches_courses):
+        self.fac_id = fac_id
+        self.fac_name = fac_name
+        self.fac_department = fac_department
+        self.fac_teaches_courses = fac_teaches_courses
+
+
+# Connect to Database
+conn = mysql.connector.connect(
+host="localhost",
+user="root",
+password="",
+database="StudentDB"
+)
+cursor = conn.cursor()
+
+
+# Create Student Table
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS Student_Master (
+    stu_id INTEGER PRIMARY KEY,
+    stu_name TEXT,
+    stu_major TEXT,
+    stu_courses TEXT,
+    stu_cgpa REAL
+)
+""")
+
+
+# Create Faculty Table
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS Faculty_Master (
+    fac_id INTEGER PRIMARY KEY,
+    fac_name TEXT,
+    fac_department TEXT,
+    fac_teaches_courses TEXT
+)
+""")
+
+conn.commit()
+
+
+# Create 5 Student Objects
+students = [
+    Student_Master(1, "John Smith", "Cybersecurity", "Python, Networking", 3.5),
+    Student_Master(2, "Mary Johnson", "Computer Science", "Java, Database", 3.8),
+    Student_Master(3, "David Brown", "Information Technology", "Networking, Security", 3.2),
+    Student_Master(4, "Sarah Wilson", "Cybersecurity", "Python, Linux", 3.9),
+    Student_Master(5, "James Davis", "Computer Science", "Programming, Database", 3.6)
+]
+
+
+# Create 5 Faculty Objects
+faculty = [
+    Faculty_Master(1, "Mr. Anderson", "Computer Science", "Python"),
+    Faculty_Master(2, "Mrs. Taylor", "Information Technology", "Networking"),
+    Faculty_Master(3, "Mr. Thomas", "Cybersecurity", "Security"),
+    Faculty_Master(4, "Mrs. White", "Mathematics", "Algebra"),
+    Faculty_Master(5, "Mr. Martin", "Computer Science", "Java")
+]
+
+
+# Insert Students into Database
+if cursor.execute("SELECT COUNT(*) FROM Student_Master").fetchone()[0] == 0:
+
+    for student in students:
+        cursor.execute("""
+        INSERT INTO Student_Master
+        VALUES (?, ?, ?, ?, ?)
+        """, (
+            student.stu_id,
+            student.stu_name,
+            student.stu_major,
+            student.stu_courses,
+            student.stu_cgpa
+        ))
+
+
+# Insert Faculty into Database
+if cursor.execute("SELECT COUNT(*) FROM Faculty_Master").fetchone()[0] == 0:
+
+    for teacher in faculty:
+        cursor.execute("""
+        INSERT INTO Faculty_Master
+        VALUES (?, ?, ?, ?)
+        """, (
+            teacher.fac_id,
+            teacher.fac_name,
+            teacher.fac_department,
+            teacher.fac_teaches_courses
+        ))
+
+conn.commit()
+
+
+# Display Students
+def display_students():
+
+    cursor.execute("SELECT * FROM Student_Master")
+    records = cursor.fetchall()
+
+    print("\n========== STUDENT DETAILS ==========")
+
+    for row in records:
+        print("\nStudent ID:", row[0])
+        print("Student Name:", row[1])
+        print("Major:", row[2])
+        print("Courses:", row[3])
+        print("CGPA:", row[4])
+
+
+# Display Faculty
+def display_faculty():
+
+    cursor.execute("SELECT * FROM Faculty_Master")
+    records = cursor.fetchall()
+
+    print("\n========== FACULTY DETAILS ==========")
+
+    for row in records:
+        print("\nFaculty ID:", row[0])
+        print("Faculty Name:", row[1])
+        print("Department:", row[2])
+        print("Teaches Courses:", row[3])
+
+
+# Main Menu
+while True:
+
+    print("\n========== UNIVERSITY DATABASE SYSTEM ==========")
+    print("1. Display Students")
+    print("2. Display Faculty")
+    print("3. Display All Records")
+    print("4. Exit")
+
+    choice = input("\nEnter your choice: ")
+
+    if choice == "1":
+        display_students()
+
+    elif choice == "2":
+        display_faculty()
+
+    elif choice == "3":
+        display_students()
+        display_faculty()
+
+    elif choice == "4":
+        print("\nThank you for using the University Database System!")
+        break
+
+    else:
+        print("\nInvalid choice. Please try again.")
+
+
+# Close Database Connection
+conn.close()
